@@ -1,6 +1,8 @@
 ---
 title: "Anova vs Linear regression"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 One way anova and linear regression are almost identical. There is no difference in the results because reference level is considered as intercept in the model. Other level effects are just the differential effect they have from the intercept. Let us give an example below.
