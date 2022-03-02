@@ -1,0 +1,35 @@
+---
+title: "Anova vs Linear regression"
+output: html_notebook
+---
+
+One way anova and linear regression are almost identical. There is no difference in the results because reference level is considered as intercept in the model. Other level effects are just the differential effect they have from the intercept. Let us give an example below.
+
+```{r, warning=FALSE}
+library(MASS)
+data("crabs")
+dat<- cbind(crabs["sp"], crabs["BD"]) #What we are doing here is creating a 
+                                      #simple dataset for one-way ANOVA
+attach(dat)
+
+lm(BD~sp)
+```
+Now, let's see what output we get from "aov" command in R. 
+
+```{r}
+aov(BD~sp)$coef
+```
+It looks like we are getting the same output from both the commands. To really look at what is happening here, let us construct out models a little bit differently. 
+
+```{r}
+species_1 <- ifelse(sp == "B", 1, 0)
+species_2 <- ifelse(sp == "O", 1, 0)
+lm(BD ~ species_2 + species_1)
+
+```
+What is happening here is that, since all the dependent variables (levels for the original model) are categorical and not one of them is continuous, both "aov" and "lm" in R has no option but to consider coefficient of one of the categorical variables as intercept. The other one then just becomes the difference between effects. To demonstrate that a little bit further, let us see the mean outcome by levels.
+
+```{r}
+tapply(BD, factor(sp) , mean)
+```
+We can compare the last two results and see that the mean effect of level "B" is the intercept in the model. The coefficient of "O" (Species 2) is  the difference between mean effects (15.478-12.583 = 2.895). 
