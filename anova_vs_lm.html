@@ -173,9 +173,9 @@ pre code {
 <p>One way anova and linear regression are almost identical. There is no difference in the results because reference level is considered as intercept in the model. Other level effects are just the differential effect they have from the intercept. Let us give an example below.</p>
 <pre class="r"><code>library(MASS)
 data(&quot;crabs&quot;)
+attach(crabs)
 dat&lt;- cbind(crabs[&quot;sp&quot;], crabs[&quot;BD&quot;]) #What we are doing here is creating a 
                                       #simple dataset for one-way ANOVA
-attach(dat)
 
 lm(BD~sp)</code></pre>
 <pre><code>## 
@@ -200,11 +200,67 @@ lm(BD ~ species_2 + species_1)</code></pre>
 ## Coefficients:
 ## (Intercept)    species_2    species_1  
 ##      12.583        2.895           NA</code></pre>
-<p>What is happening here is that, since all the dependent variables (levels for the original model) are categorical and not one of them is continuous, both “aov” and “lm” in R has no option but to consider coefficient of one of the categorical variables as intercept. The other one then just becomes the difference between effects. To demonstrate that a little bit further, let us see the mean outcome by levels.</p>
+<p>What is happening here is that, since all the dependent variables (levels for the original model) are categorical, both “aov” and “lm” in R have no option but to consider coefficient of one of the categorical variables as intercept. The other one then just becomes the difference between effects. To demonstrate that a little bit further, let us see the mean outcome by levels.</p>
 <pre class="r"><code>tapply(BD, factor(sp) , mean)</code></pre>
 <pre><code>##      B      O 
 ## 12.583 15.478</code></pre>
 <p>We can compare the last two results and see that the mean effect of level “B” is the intercept in the model. The coefficient of “O” (Species 2) is the difference between mean effects (15.478-12.583 = 2.895).</p>
+<div id="ancova" class="section level2">
+<h2>Ancova</h2>
+<p>Let us now include one of the continuous variables in the model. Here, we add “FL” a our co-variate.</p>
+<pre class="r"><code>lm(BD ~ species_2 + species_1 + FL)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BD ~ species_2 + species_1 + FL)
+## 
+## Coefficients:
+## (Intercept)    species_2    species_1           FL  
+##    -1.08478     -0.07465           NA      0.97238</code></pre>
+<p>We can see from the results that every estimates has changed and there is a new estimate for the included co-variate. Now, let us discuss how did that happen. Since, there are both categorical and continuous variables in the model, we need to first find the outcome adjusted for co-variate. We are going to use this adjusted values, i.e. residuals of first regression, in the second regression to estimate the coefficients of the levels of categorical variables. Now, to avoid a further problem, let estimate the first regression without any intercept. We do that by de-meaning the co-variate.</p>
+<pre class="r"><code>x_cv &lt;- FL - mean(FL)
+mod1 &lt;- lm(BD~-1+x_cv)
+lm(mod1$residual ~ species_2 + species_1 + x_cv)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = mod1$residual ~ species_2 + species_1 + x_cv)
+## 
+## Coefficients:
+## (Intercept)    species_2    species_1         x_cv  
+##   14.067825    -0.074650           NA     0.004689</code></pre>
+<p>We see that the coefficient for species_2 is the same as before. To match the coefficient of the co-variate as well, we need to simply add the estimates of the two models.</p>
+<pre class="r"><code>mod1$coef + 0.004689</code></pre>
+<pre><code>##     x_cv 
+## 0.972381</code></pre>
+<p>Finally, we can see a large difference between the two estimates of the intercepts. We need to carefully look at the fact that we are using a demeaned co-variate. So, the difference of the estimated intercept and the global mean of co-variate times the estimated coefficient should be equal to the result.</p>
+<pre class="r"><code>14.067825- mean(FL)*0.972381</code></pre>
+<pre><code>## [1] -1.084788</code></pre>
+<p>Let us explain the mathematical background behind these operations.</p>
+<p><span class="math display">\[y_{res} = y - b(X-\bar{X})=\mu + \alpha + \beta(X-\bar{X})\]</span> <span class="math display">\[=&gt; y = \mu + \alpha + (b + \beta)(X-\bar{X})\]</span> <span class="math display">\[=&gt; y = (\mu - (b + \beta)\bar{X}) + \alpha + (b + \beta)X\]</span> ## Factorial Design</p>
+<pre class="r"><code>dat1 &lt;-  cbind(crabs[&quot;sp&quot;], crabs[&quot;sex&quot;], crabs[&quot;BD&quot;])
+lm(BD~sp*sex)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BD ~ sp * sex)
+## 
+## Coefficients:
+## (Intercept)          spO         sexM     spO:sexM  
+##      11.816        3.816        1.534       -1.842</code></pre>
+<pre class="r"><code>spB&lt;- ifelse(sp == &quot;B&quot;, 1, 0)
+spO&lt;- ifelse(sp == &quot;O&quot;, 1, 0)
+sexM&lt;- ifelse(sex == &quot;M&quot;, 1, 0)
+sexF&lt;- ifelse(sex == &quot;F&quot;, 1, 0)
+lm(BD ~ spO + spB + sexM + sexF + spO * sexM + spB * sexM + spO * sexF + spB * sexF)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = BD ~ spO + spB + sexM + sexF + spO * sexM + spB * 
+##     sexM + spO * sexF + spB * sexF)
+## 
+## Coefficients:
+## (Intercept)          spO          spB         sexM         sexF     spO:sexM  
+##      11.816        3.816           NA        1.534           NA       -1.842  
+##    spB:sexM     spO:sexF     spB:sexF  
+##          NA           NA           NA</code></pre>
+</div>
 
 
 
