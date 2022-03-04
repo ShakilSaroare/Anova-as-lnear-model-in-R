@@ -1,0 +1,84 @@
+---
+title: "Anova vs Linear regression"
+output:
+  html_document:
+    df_print: paged
+---
+
+One way anova and linear regression are almost identical. There is no difference in the results because reference level is considered as intercept in the model. Other level effects are just the differential effect they have from the intercept. Let us give an example below.
+
+```{r, warning=FALSE}
+library(MASS)
+data("crabs")
+attach(crabs)
+dat<- cbind(crabs["sp"], crabs["BD"]) #What we are doing here is creating a 
+                                      #simple dataset for one-way ANOVA
+
+lm(BD~sp)
+```
+Now, let's see what output we get from "aov" command in R. 
+
+```{r}
+aov(BD~sp)$coef
+```
+It looks like we are getting the same output from both the commands. To really look at what is happening here, let us construct out models a little bit differently. 
+
+```{r}
+species_1 <- ifelse(sp == "B", 1, 0)
+species_2 <- ifelse(sp == "O", 1, 0)
+lm(BD ~ species_2 + species_1)
+
+```
+What is happening here is that, since all the dependent variables (levels for the original model) are categorical, both "aov" and "lm" in R have no option but to consider coefficient of one of the categorical variables as intercept. The other one then just becomes the difference between effects. To demonstrate that a little bit further, let us see the mean outcome by levels.
+
+```{r}
+tapply(BD, factor(sp) , mean)
+```
+We can compare the last two results and see that the mean effect of level "B" is the intercept in the model. The coefficient of "O" (Species 2) is  the difference between mean effects (15.478-12.583 = 2.895). 
+
+## Ancova 
+
+Let us now include one of the continuous variables in the model. Here, we add "FL" a our co-variate. 
+
+```{r}
+lm(BD ~ species_2 + species_1 + FL)
+```
+
+We can see from the results that every estimates has changed and there is a new estimate for the included co-variate. Now, let us discuss how did that happen. Since, there are both categorical and continuous variables in the model, we need to first find the outcome adjusted for co-variate. We are going to use this adjusted values, i.e. residuals of first regression, in the second regression to estimate the coefficients of the levels of categorical variables. Now, to avoid a further problem, let estimate the first regression without any intercept. We do that by de-meaning the co-variate.
+
+```{r}
+x_cv <- FL - mean(FL)
+mod1 <- lm(BD~-1+x_cv)
+lm(mod1$residual ~ species_2 + species_1 + x_cv)
+```
+We see that the coefficient for species_2 is the same as before. To match the coefficient of the co-variate as well, we need to simply add the estimates of the two models. 
+
+```{r}
+mod1$coef + 0.004689
+```
+Finally, we can see a large difference between the two estimates of the intercepts. We need to carefully look at the fact that we are using a demeaned co-variate. So, the difference of the estimated intercept and the global mean of co-variate times the estimated coefficient should be equal to the result.   
+
+```{r}
+14.067825- mean(FL)*0.972381
+```
+Let us explain the mathematical background behind these operations. 
+
+$$y_{res} = y - b(X-\bar{X})=\mu + \alpha + \beta(X-\bar{X})$$
+$$=> y = \mu + \alpha + (b + \beta)(X-\bar{X})$$
+$$=> y = (\mu - (b + \beta)\bar{X}) + \alpha + (b + \beta)X$$
+## Factorial Design
+
+```{r}
+dat1 <-  cbind(crabs["sp"], crabs["sex"], crabs["BD"])
+lm(BD~sp*sex)
+```
+
+
+```{r}
+spB<- ifelse(sp == "B", 1, 0)
+spO<- ifelse(sp == "O", 1, 0)
+sexM<- ifelse(sex == "M", 1, 0)
+sexF<- ifelse(sex == "F", 1, 0)
+lm(BD ~ spO + spB + sexM + sexF + spO * sexM + spB * sexM + spO * sexF + spB * sexF)
+```
+
