@@ -3,7 +3,14 @@ title: "Anova vs Linear regression"
 output:
   html_document:
     df_print: paged
+    
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 ---
+
 
 One way anova and linear regression are almost identical. There is no difference in the results because reference level is considered as intercept in the model. Other level effects are just the differential effect they have from the intercept. Let us give an example below.
 
