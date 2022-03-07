@@ -79,7 +79,7 @@ $$=> y = (\mu - (b + \beta)\bar{X}) + \alpha + (b + \beta)X$$
 dat1 <-  cbind(crabs["sp"], crabs["sex"], crabs["BD"])
 lm(BD~sp*sex)
 ```
-
+We understand from the result that R has considered "spoB" and "sexF" as reference. Which is evident from the following linear model as well.
 
 ```{r}
 spB<- ifelse(sp == "B", 1, 0)
@@ -88,4 +88,17 @@ sexM<- ifelse(sex == "M", 1, 0)
 sexF<- ifelse(sex == "F", 1, 0)
 lm(BD ~ spO + spB + sexM + sexF + spO * sexM + spB * sexM + spO * sexF + spB * sexF)
 ```
+Now, let us interpret the model parameters. What is happening here is more apparent when we look at the following table.
+
+```{r, warnings = F}
+library(dplyr)
+dat1 %>% group_by(sp, sex) %>% summarize(mean(BD))
+```
+Since, both "spB" and "sexF" are reference, the mean outcome of that category is our intercept this time. The main effects are calculated like the models before by subtracting from this reference group. Once we have the main effect, we can now estimate the interaction effect by any of the equations below.
+
+$$E[BD|sp = O, sex = M] - E[BD|sp = B, sex = F] = \alpha + \gamma + \delta$$
+$$E[BD|sp = O, sex = M] - E[BD|sp = O, sex = F] = \gamma + \delta$$
+$$E[BD|sp = O, sex = M] - E[BD|sp = B, sex = M] = \alpha + \delta$$
+
+where, $\alpha$, $\gamma$ and $\delta$ are main effect of "sp", main effect of "sex" and interaction effect of "sp" and "sex" respectively. 
 
