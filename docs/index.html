@@ -190,7 +190,7 @@ lm(BD~sp)</code></pre>
 <pre><code>## (Intercept)         spO 
 ##      12.583       2.895</code></pre>
 <p>It looks like we are getting the same output from both the commands. To really look at what is happening here, let us construct out models a little bit differently.</p>
-<pre class="r"><code>species_1 &lt;- ifelse(sp == &quot;B&quot;, 1, 0)
+<pre class="r"><code>species_1 &lt;- rep(-1, length(sp))
 species_2 &lt;- ifelse(sp == &quot;O&quot;, 1, 0)
 lm(BD ~ species_2 + species_1)</code></pre>
 <pre><code>## 
@@ -200,7 +200,7 @@ lm(BD ~ species_2 + species_1)</code></pre>
 ## Coefficients:
 ## (Intercept)    species_2    species_1  
 ##      12.583        2.895           NA</code></pre>
-<p>What is happening here is that, since all the dependent variables (levels for the original model) are categorical, both “aov” and “lm” in R have no option but to consider coefficient of one of the categorical variables as intercept. The other one then just becomes the difference between effects. To demonstrate that a little bit further, let us see the mean outcome by levels.</p>
+<p>What is happening here is that, R is using treatment contrast by default which is shown here through the use of contrast coding. We have coded the reference level with -1 and other level as 1 when true and 0 otherwise. Both “aov” and “lm” in R does this coding in background to considers the mean outcome at the reference level as intercept. The other one then just becomes the difference between effects. To demonstrate that a little bit further, let us see the mean outcome by levels.</p>
 <pre class="r"><code>tapply(BD, factor(sp) , mean)</code></pre>
 <pre><code>##      B      O 
 ## 12.583 15.478</code></pre>
