@@ -235,7 +235,11 @@ lm(mod1$residual ~ species_2 + species_1 + x_cv)</code></pre>
 <pre class="r"><code>14.067825- mean(FL)*0.972381</code></pre>
 <pre><code>## [1] -1.084788</code></pre>
 <p>Let us explain the mathematical background behind these operations.</p>
-<p><span class="math display">\[y_{res} = y - b(X-\bar{X})=\mu + \alpha + \beta(X-\bar{X})\]</span> <span class="math display">\[=&gt; y = \mu + \alpha + (b + \beta)(X-\bar{X})\]</span> <span class="math display">\[=&gt; y = (\mu - (b + \beta)\bar{X}) + \alpha + (b + \beta)X\]</span> ## Factorial Design</p>
+<p><span class="math display">\[y_{res} = y - b(X-\bar{X})=\mu + \alpha + \beta(X-\bar{X})\]</span> <span class="math display">\[=&gt; y = \mu + \alpha + (b + \beta)(X-\bar{X})\]</span> <span class="math display">\[=&gt; y = (\mu - (b + \beta)\bar{X}) + \alpha + (b + \beta)X\]</span></p>
+</div>
+<div id="factorial-design" class="section level2">
+<h2>Factorial Design</h2>
+<p>We are going to introduce a second categorical variable “sex” into the dataframe. Since, we have discussed about estimating main effects from one-way anova already, we are going to focus more on estimating the interaction effect of two-way anova.</p>
 <pre class="r"><code>dat1 &lt;-  cbind(crabs[&quot;sp&quot;], crabs[&quot;sex&quot;], crabs[&quot;BD&quot;])
 lm(BD~sp*sex)</code></pre>
 <pre><code>## 
@@ -262,20 +266,8 @@ lm(BD ~ spO + spB + sexM + sexF + spO * sexM + spB * sexM + spO * sexF + spB * s
 ##    spB:sexM     spO:sexF     spB:sexF  
 ##          NA           NA           NA</code></pre>
 <p>Now, let us interpret the model parameters. What is happening here is more apparent when we look at the following table.</p>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:MASS&#39;:
-## 
-##     select</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>dat1 %&gt;% group_by(sp, sex) %&gt;% summarize(mean(BD))</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;sp&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>library(dplyr)
+dat1 %&gt;% group_by(sp, sex) %&gt;% summarize(mean(BD))</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["sp"],"name":[1],"type":["fct"],"align":["left"]},{"label":["sex"],"name":[2],"type":["fct"],"align":["left"]},{"label":["mean(BD)"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"B","2":"F","3":"11.816"},{"1":"B","2":"M","3":"13.350"},{"1":"O","2":"F","3":"15.632"},{"1":"O","2":"M","3":"15.324"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}

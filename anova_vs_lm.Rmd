@@ -73,7 +73,10 @@ Let us explain the mathematical background behind these operations.
 $$y_{res} = y - b(X-\bar{X})=\mu + \alpha + \beta(X-\bar{X})$$
 $$=> y = \mu + \alpha + (b + \beta)(X-\bar{X})$$
 $$=> y = (\mu - (b + \beta)\bar{X}) + \alpha + (b + \beta)X$$
+
 ## Factorial Design
+
+We are going to introduce a second categorical variable "sex" into the dataframe. Since, we have discussed about estimating main effects from one-way anova already, we are going to focus more on estimating the interaction effect of two-way anova.
 
 ```{r}
 dat1 <-  cbind(crabs["sp"], crabs["sex"], crabs["BD"])
@@ -90,7 +93,7 @@ lm(BD ~ spO + spB + sexM + sexF + spO * sexM + spB * sexM + spO * sexF + spB * s
 ```
 Now, let us interpret the model parameters. What is happening here is more apparent when we look at the following table.
 
-```{r, warnings = F}
+```{r, warnings = F, message= F}
 library(dplyr)
 dat1 %>% group_by(sp, sex) %>% summarize(mean(BD))
 ```
